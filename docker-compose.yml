@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+ eurekaserver:
+#   build: C:\sandbox\microservices\Haythem\EurekaServer
+   container_name: eureka
+   image: unholyhoper/eureka
+   networks:
+      - eureka-server
+   ports:
+    - "8761:8761"
+    
+ microservice-users:
+#   build: C:\sandbox\microservices\Haythem\users-management
+   network_mode: host
+   container_name: users-management
+   image: unholyhoper/users-management
+   ports:
+   - "8801:8801"
+   networks:
+      - eureka-server
+   environment:
+    - eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka
+   depends_on:
+     - eurekaserver
+ microservice-gateway:
+#   build: C:\sandbox\microservices\Haythem\gateway
+   network_mode: host
+   image: unholyhoper/gateway
+   ports:
+   - "8762:8762"
+   networks:
+      - eureka-server
+   environment:
+    - eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka
+   depends_on:
+     - eurekaserver
+ keycloak:
+   image: unholyhoper/keycloakimage
+   container_name: keycloak
+   networks:
+     - eureka-server
+   ports:
+     - "8080:8080"
+   environment:
+     DB_VENDOR: H2
+     KEYCLOAK_USER: admin
+     KEYCLOAK_PASSWORD: admin
+     KEYCLOAK_IMPORT: /tmp/microservices-realm.json
+   volumes:
+     - ./microservices-realm.json:/tmp/microservices-realm.json
+   depends_on:
+     - eurekaserver
+
+networks:
+  eureka-server:
+    name: eureka-server
+    driver: bridge
