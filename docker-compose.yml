@@ -36,6 +36,22 @@ services:
     depends_on:
       - eurekaserver
 
+  keycloak:
+    image: unholyhoper/keycloakimage
+    container_name: keycloak
+    networks:
+      - eureka-server
+    ports:
+      - "8443:8443"
+    environment:
+      DB_VENDOR: H2
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/microservices-realm.json
+    volumes:
+      - ./microservices-realm.json:/tmp/microservices-realm.json
+    depends_on:
+      - eurekaserver
 networks:
   eureka-server:
     name: eureka-server
