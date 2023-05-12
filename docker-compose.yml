@@ -38,21 +38,39 @@ services:
       - eurekaserver
 
   keycloak:
-    image: unholyhoper/keycloakimage-microservices
+    image: f42d810db3c2f27a439a78b3e21b56b1255e639d969a79346ad3b0add608b812
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start"]
     container_name: keycloak
     networks:
       - eureka-server
     ports:
       - "8443:8443"
     environment:
-      DB_VENDOR: H2
-      KEYCLOAK_IMPORT: /tmp/microservices-realm.json
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      DB_VENDOR: oracle
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KC_DB_URL: jdbc:oracle:thin:@host.docker.internal:1521:orcl
+      KC_DB: oracle
     volumes:
       - ./microservices-realm.json:/tmp/microservices-realm.json
     depends_on:
       - eurekaserver
+
+#  oracle:
+#    image: container-registry.oracle.com/database/free:latest
+#    container_name: oracle19c
+#    ports:
+#      - 1521:1522
+#    environment:
+#      ORACLE_SID: ORCLCDB
+#      ORACLE_PDB: KEYCLOAK
+#      ORACLE_PWD: KEYCLOAK
+#    volumes:
+#      - ./data:/opt/oracle/oradata
+#    networks:
+#      - eureka-server
+
+
 networks:
   eureka-server:
     name: eureka-server
